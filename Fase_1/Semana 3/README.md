@@ -50,5 +50,7 @@ El desarrollo de este script implicó resolver varias inconsistencias en la arqu
 4. Selecciona todo el código y arrástralo a tu *Shelf* para crear un botón de acceso rápido o puedes ejecutarlo directamente.
 5. **Uso:** Selecciona tu asset en el Viewport y haz clic en el botón "Generar Estudio"(si ejecutaste desde el Script Editor) o presionar el botón de acceso rápido en el *Shelf*.
 
-![VideoPreview](./assets/video/PreviewLookDevStudioProV1.0.mp4)
-
+<video width="100%" controls>
+  <source src="./assets/video/Previewlookdevstudioprov1.0.mp4" type="video/mp4">
+  Tu navegador no soporta la etiqueta de video.
+</video>
