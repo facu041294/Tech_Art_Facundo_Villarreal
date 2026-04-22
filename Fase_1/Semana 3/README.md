@@ -54,3 +54,6 @@ El desarrollo de este script implicó resolver varias inconsistencias en la arqu
   <source src="./assets/video/Previewlookdevstudioprov1.0.mp4" type="video/mp4">
   Tu navegador no soporta la etiqueta de video.
 </video>
+
+https://github.com/user-attachments/assets/0ce183ec-5260-474c-bce9-671c765813e2
+
