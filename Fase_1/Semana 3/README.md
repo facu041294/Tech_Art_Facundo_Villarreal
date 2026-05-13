@@ -46,7 +46,7 @@ El desarrollo de este script implicó resolver varias inconsistencias en la arqu
 
 1. Abre Autodesk Maya (Asegúrate de que el plugin `mtoa` / Arnold esté cargado).
 2. Abre el **Script Editor** (Windows > General Editors > Script Editor).
-3. Pega el código del archivo `PhotoStudio_ZUp.mel` en una pestaña de MEL.
+3. Pega el código del archivo `LookDevStudioPro.mel` en una pestaña de MEL.
 4. Selecciona todo el código y arrástralo a tu *Shelf* para crear un botón de acceso rápido o puedes ejecutarlo directamente.
 5. **Uso:** Selecciona tu asset en el Viewport y haz clic en el botón "Generar Estudio"(si ejecutaste desde el Script Editor) o presionar el botón de acceso rápido en el *Shelf*.
 
