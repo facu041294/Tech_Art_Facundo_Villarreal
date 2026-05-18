@@ -1,0 +1,28 @@
+[tool.black]
+# Sincronizamos la longitud de línea con Ruff
+line-length = 88
+# Le decimos a Black para qué versión de Python está formateando
+target-version = ['py311']
+# Excluimos carpetas donde Black no debería meterse nunca
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | venv
+  | \.vscode
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+# Misma longitud que Black
+line-length = 88
+# Versión objetivo de Python
+target-version = "py311"
+
+[tool.ruff.lint]
+# E = Estilo (Pycodestyle), F = Lógica (Pyflakes), W = Warnings
+select = ["E", "F", "W"]
+# Ignoramos reglas que choquen con Black (Black tiene la última palabra en formato)
+ignore = []
