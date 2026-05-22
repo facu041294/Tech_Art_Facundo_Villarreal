@@ -17,12 +17,17 @@ Este instructivo está diseñado para estandarizar el entorno de desarrollo del 
 Elegí el escenario que corresponda al estado actual de tu computadora de trabajo: (**El objetivo principal es mantener el sistema global limpio**)
 
 ### Escenario A: Computadora limpia (Sin versiones previas de Python)
-1. Dirigite a la página oficial de descargas: [Python 3.11 Releases](https://www.python.org/downloads/).
+1. Dirigite a la página oficial de descargas: [Python Windows Versions](https://www.python.org/downloads/windows/).
 2. Descargá el instalador correspondiente: **`Windows installer (64-bit)`** (un archivo `.exe`). No descargues el paquete *embeddable* ni el código fuente.
-3. **⚠️ PASO CRÍTICO:** Al ejecutar el instalador, en la primera pantalla, **ASEGURARSE DE DESMARCAR la casilla `Add python.exe to PATH`**.
+3. **⚠️ PASO CRÍTICO:** Al ejecutar el instalador en modo administrador, en la primera pantalla, **ASEGURARSE DE DESMARCAR la casilla `Add python.exe to PATH`**.
+<img width="654" height="401" alt="image" src="https://github.com/user-attachments/assets/c1caf391-9f9c-4fbf-8d69-e27a9429a461" />
+
 4. Luego, elegí **"Customize installation"**.
-5. En la pantalla de "Advanced Options", verificá que la casilla **`Add Python to environment variables` también esté DESMARCADA**.
-6. Completá la instalación.
+5. En la pantalla de "Optional Features" presionas Next.
+6. En la pantalla de "Advanced Options", verificá que la casilla **`Add Python to environment variables` también esté DESMARCADA**.
+<img width="645" height="396" alt="image" src="https://github.com/user-attachments/assets/909bbe5b-0006-47f7-8d0e-73cae96b6bae" />
+
+7. Completá la instalación.
    * *¿Por qué esto importa?* Si omitís este paso, Windows registrará el ejecutable del lenguaje a nivel global, llevando a posibles conflictos graves con las versiones internas de Python que traen otros programas (DCCs).
 
 ### Escenario B: Computadora con otra versión instalada (Ej. Python 3.13+)
@@ -39,7 +44,8 @@ Elegí el escenario que corresponda al estado actual de tu computadora de trabaj
 
 **Regla de oro del estudio:** Nunca instalamos librerías, formateadores o linters en el entorno global de Windows. Cada repositorio posee su propia "burbuja" de dependencias.
 
-1. Abrí **VS Code** y abrí la carpeta raíz del repositorio del proyecto (`File > Open Folder...`).
+0. Si no lo tienes a Visual Studio Code, descargalo de este [Link de descarga](https://code.visualstudio.com).
+1. Abrí **VS Code** y abrí la carpeta raíz del repositorio del proyecto test para esta tarea (`File > Open Folder...`).
 2. Abrí la terminal integrada de VS Code (`Ctrl + \``). Asegurate de que esté usando **PowerShell (PS)** o **CMD**.
 3. Parado en la raíz de tu proyecto, ejecutá el comando para crear el entorno virtual aislado:
 ```powershell
