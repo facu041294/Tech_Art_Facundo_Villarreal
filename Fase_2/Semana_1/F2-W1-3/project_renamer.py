@@ -1,4 +1,5 @@
 import argparse
+import json
 import logging
 import re
 import sys
@@ -15,9 +16,14 @@ console = Console()
 
 
 def setup_logger() -> logging.Logger:
-    """Configura el logger para escupir un archivo con timestamp."""
+    """Configura el logger para guardar logs en la carpeta /logs."""
+    # 1. Definimos la carpeta de logs
+    log_dir = Path("logs")
+    log_dir.mkdir(exist_ok=True)  # La crea si no existe, si existe no hace nada
+
+    # 2. Generamos el nombre del archivo dentro de esa carpeta
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_filename = f"rename_log_{timestamp}.txt"
+    log_filename = log_dir / f"rename_log_{timestamp}.txt"
 
     logging.basicConfig(
         filename=log_filename,
@@ -113,9 +119,15 @@ class ProjectRenamer(BatchTool):
     """
 
     def __init__(
-        self, target_dir: Path, project: str, variant: str, dry_run: bool = True
+        self,
+        target_dir: Path,
+        project: str,
+        variant: str,
+        config: dict,
+        dry_run: bool = True,
     ):
         super().__init__(target_dir, dry_run)
+        self.config = config
         self.project = self._clean_string(project)
         self.variant = self._clean_string(variant)
         self.version_counter = 1
@@ -128,9 +140,11 @@ class ProjectRenamer(BatchTool):
             .encode("ascii", "ignore")
             .decode("utf-8")
         )
-        # Reemplazar todo lo que no sea alfanumérico por espacios
-        text = re.sub(r"[^\w\s]", " ", text)
-        # Reemplazar espacios por guiones bajos y colapsar múltiples guiones
+        # Reemplazar todo lo que NO sea letra o número por espacios
+        # (Evitamos \w para que no se nos filtren guiones bajos viejos)
+        text = re.sub(r"[^a-zA-Z0-9]", " ", text)
+
+        # Reemplazar espacios múltiples por un solo guion bajo
         text = re.sub(r"\s+", "_", text.strip())
         return text.lower()
 
@@ -138,11 +152,28 @@ class ProjectRenamer(BatchTool):
         old_name = filepath.name
         extension = filepath.suffix.lower()
 
-        # Limpiamos el nombre original (sin extensión) para usarlo como base del asset
+        # --- DEFENSA: Verificamos si el archivo YA cumple la convención ---
+        # Busca: proyecto_cualquierCosa_variante_v[3 numeros].ext
+        patron_validacion = f"^{self.project}_.*_{self.variant}_v[0-9]{{3}}{extension}$"
+        if re.match(patron_validacion, old_name):
+            self.results.append(
+                {
+                    "old": old_name,
+                    "new": old_name,
+                    "status": "[yellow]Ignorado (Ya cumple)",
+                }
+            )
+            return
+
         asset_base = self._clean_string(filepath.stem)
 
-        # Formateamos el nuevo nombre (ej: proj_mi_asset_var_v001.fbx)
-        new_name = f"{self.project}_{asset_base}_{self.variant}_v{self.version_counter:03d}{extension}"
+        new_name = self.config["naming_convention"].format(
+            project=self.project,
+            asset=asset_base,
+            variant=self.variant,
+            version=self.version_counter,
+            ext=extension,
+        )
         new_filepath = filepath.with_name(new_name)
 
         if old_name == new_name:
@@ -209,10 +240,21 @@ def main():
     # Si --apply está presente, dry_run es False. Si no está, dry_run es True.
     is_dry_run = not args.apply
 
+    config_path = Path("config.json")
+    if not config_path.exists():
+        console.print(
+            "[bold red]ERROR CRÍTICO: No se encontró el archivo config.json[/bold red]"
+        )
+        sys.exit(1)
+
+    with open(config_path, "r", encoding="utf-8") as f:
+        project_config = json.load(f)
+
     renamer = ProjectRenamer(
         target_dir=target_path,
         project=args.project,
         variant=args.variant,
+        config=project_config,
         dry_run=is_dry_run,
     )
     renamer.run()

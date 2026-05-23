@@ -1,0 +1,20 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Carpetas de caché y configuraciones de IDE
+.pytest_cache/
+.ruff_cache/
+.vscode/
+__pycache__/
+
+# Logs generados por las herramientas
+logs/
+
+# Carpetas de pruebas locales y temporales
+assets_test/
+
+# Archivos de sistema operativo (opcional pero recomendado)
+.DS_Store
+Thumbs.db

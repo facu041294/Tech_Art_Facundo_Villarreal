@@ -1,14 +1,16 @@
 # 🛠️ Project Renamer & BatchTool Framework
+---
+Esta suite de herramientas CLI permite automatizar tareas de pipeline a gran escala, eliminando la intervención manual y garantizando la consistencia en producciones de VFX, Juegos y Virtual Production.
 
-Esta herramienta de línea de comandos (CLI) está diseñada para normalizar masivamente los nombres de assets en producciones de VFX y Videojuegos, aplicando convenciones de nomenclatura estrictas (`proyecto_asset_variant_v###.ext`).
+El framework está construido sobre un principio de Programación Orientada a Objetos (POO): la lógica compleja de manejo de archivos, errores y reportes reside en una clase base abstracta, permitiendo escalar a nuevas herramientas en minutos.
 
-Más allá de ser un simple renombrador, este script fue desarrollado utilizando **Programación Orientada a Objetos (POO)** y define un framework base (`BatchTool`) del cual se pueden derivar futuras herramientas de procesamiento masivo.
+Diseñé BatchTool como una clase abstracta para desacoplar la lógica de gestión de archivos (iteración, logging, dry-run, reporte) de la regla de negocio (qué renombrar, qué mover, qué convertir). Esto hace que cualquier desarrollador junior pueda agregar una herramienta nueva en 10 líneas de código sin riesgo de romper el sistema de logging o los tests globales.
 
 ---
 
 ## 🏗️ Arquitectura del Sistema
 
-Para evitar la duplicación de código en el futuro, la lógica común (iteración de archivos, reportes visuales, manejo de errores de permisos y el sistema de prevención "Dry Run") se abstrajo en una clase base. `ProjectRenamer` simplemente hereda esta infraestructura y aplica su regla de negocio específica.
+Para evitar la duplicación de código, la lógica de procesamiento masivo se abstrajo en una clase base BatchTool.
 
 ```mermaid
 classDiagram
@@ -23,30 +25,47 @@ classDiagram
     }
 
     class ProjectRenamer {
-        +str project_name
-        +str variant
-        +int counter
         +process_item(Path filepath)
-        -clean_string(str text) str
+        -_clean_string(str text)
     }
 
     class MassMover {
-        +Path destination
         +process_item(Path filepath)
     }
 
     class MassConverter {
-        +str target_format
         +process_item(Path filepath)
     }
 
-    BatchTool <|-- ProjectRenamer : Hereda
-    BatchTool <|-- MassMover : Hereda (Futuro)
-    BatchTool <|-- MassConverter : Hereda (Futuro)
-    
-    note for BatchTool "Maneja el iterador de archivos,\nlogging, try/except global\ny chequeo de permisos."
-    note for ProjectRenamer "Solo se preocupa por la\nregla de negocio (Naming)."
+    class MassTagger {
+        +process_item(Path filepath)
+    }
+
+    BatchTool <|-- ProjectRenamer
+    BatchTool <|-- MassMover
+    BatchTool <|-- MassConverter
+    BatchTool <|-- MassTagger
 ```
+## 🧩 Desglose de BatchTool
+- run(): Motor principal que itera archivos, ignora logs/carpetas y maneja excepciones globales (permisos, bloqueos).
+
+- process_item(filepath): Método abstracto que define la "regla de negocio" para cada herramienta específica.
+
+- report(): Genera una tabla visual de resultados mediante la librería rich.
+
+## 📂 Estructura del Repositorio y Convenciones
+
+### Árbol del Proyecto
+```text
+F2-W1-3/
+├── assets_test/           # Sandbox para pruebas de archivos
+├── config.json            # Configuración externa de nomenclatura
+├── project_renamer.py     # Herramienta principal de nombrado
+├── derived_tools.py       # Ecosistema (MassMover, MassConverter, MassTagger)
+├── test_project_renamer.py # Suite de tests (pytest)
+└── rename_log_*.txt       # Logs generados automáticamente
+```
+
 
 ## 🚀 Requisitos e Instalación
 Esta herramienta utiliza rich para generar tablas visuales en la consola y facilitar la lectura de los reportes.
@@ -58,17 +77,19 @@ Instalá las dependencias necesarias:
 pip install rich
 ```
 
-## ⚙️ Cómo Usar la Herramienta (CLI)
-Por seguridad, la herramienta opera por defecto en modo Dry-Run. Esto significa que escaneará la carpeta y mostrará una tabla con los cambios propuestos, pero no modificará físicamente ningún archivo hasta que se le indique explícitamente.
+## ⚙️ Uso de la Herramienta (CLI)
+1. Project Renamer
+Aplica la convención definida en config.json ({project}_{asset}_{variant}_v{version}{ext}).
 
-Argumentos:
-- directory (Requerido): La ruta a la carpeta que contiene los assets.
+- Simulación (Segura):
+```bash
+python project_renamer.py ./assets -p "FILM" -v "lookdev"
+```
+- Aplicación Real:
+```bash
+python project_renamer.py ./assets -p "FILM" -v "lookdev" --apply
+```
 
-- -p / --project (Requerido): El acrónimo o nombre del proyecto (Ej: FILM, PRJ1).
-
-- -v / --variant (Opcional): La variante del asset. Por defecto es base (Ej: proxy, lookdev, high).
-
-- --apply (Opcional): Atención: Usar este flag ejecuta los cambios físicamente en el disco.
 
 ## 💻 Ejemplos de Uso
 ### 1. Simulación Segura (Dry-Run)
@@ -91,13 +112,16 @@ Salida esperada:
 3. Se generará automáticamente un archivo rename_log_YYYYMMDD_HHMMSS.txt en la raíz con el registro técnico de toda la operación (útil para auditorías de producción).
 
 ## 🫂 Para futuros Technical Artists (Extensibilidad)
-Si necesitas crear una nueva herramienta masiva (por ejemplo, un script que mueva archivos de texturas a carpetas específicas), no programes todo desde cero.
+¿Necesitás crear una herramienta nueva (Ej: MassMover)?
 
-Importá la clase abstracta BatchTool.
+1. Importá la clase base: from project_renamer import BatchTool.
 
-Creá tu nueva clase heredando de ella (Ej: class MassMover(BatchTool):).
+2. Heredá de ella y sobrescribí únicamente el método process_item(self, filepath).
 
-Sobrescribí únicamente la función process_item(self, filepath: Path).
+3. Tu nueva tool tendrá automáticamente soporte para dry-run, logs y tablas de reporte.
 
-El framework se encargará automáticamente de proteger la ejecución, manejar los crashes y armarte la tabla de reporte final.
-
+## 🧪 Pruebas Automatizadas
+El sistema está validado con una suite de tests que cubren casos extremos (nombres con caracteres extraños, archivos sin extensión, archivos ya correctamente nombrados):
+```bash
+pytest test_project_renamer.py -v
+```

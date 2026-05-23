@@ -1,0 +1,4 @@
+{
+    "naming_convention": "{project}_{asset}_{variant}_v{version:03d}{ext}",
+    "log_prefix": "rename_log_"
+}
